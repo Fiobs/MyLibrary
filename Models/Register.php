@@ -24,11 +24,6 @@ class Register
         $pass = md5(md5(trim($_POST['pass'])));
         $pass2 = md5(md5(trim($_POST['pass2'])));
 
-
-        var_dump($_POST);
-        var_dump(empty($login));
-        var_dump(!empty($login));die();
-
         if (isset($_POST['submit'])) {
             $error = [];
 
