@@ -36,7 +36,7 @@ class App
         // Формируем наименование действия
         $action = $action . 'Action';
 
-        // Если класа не существует выдаем ошибку
+        // Если класа не существует выдаем 404
         if (!class_exists($controller)) {
             $controller = 'Controllers\\HomeController';
             $action = "cheatersAction";
@@ -45,10 +45,11 @@ class App
         // Создаем экземпляр класса контроллера
         $objController = new $controller;
 
-
-        // Если у контролера отсутствует метод, кинуть исключение
+        // Если у контролера отсутствует метод, кинуть 404
         if (!method_exists($objController, $action)) {
-            throw new \ErrorException('Action does not exist');
+            $action = "cheatersAction";
+            $controller = 'Controllers\\HomeController';
+            $objController = new $controller;
         }
 
         // Вызываем метод у контроллера

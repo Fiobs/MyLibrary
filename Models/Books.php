@@ -4,23 +4,20 @@
 namespace Models;
 
 
-class Books
+class Books extends Datas
 {
-    protected $dbh;
     protected $books = [];
     protected $authors_books = [];
 
     public function __construct()
     {
         // Подключаем базу
-        $this->dbh = new \PDO('mysql:host=localhost;port=3308;dbname=test_db', 'root');
-        $this->dbh->exec('SET NAMES utf8');
-
+        parent::__construct();
     }
 
     public function getBooks()
     {
-        $sth = $this->dbh->prepare("SELECT * FROM books");
+        $sth = $this->dbTest->prepare("SELECT * FROM books");
         $sth->execute();
         $arr = $sth->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -41,7 +38,7 @@ class Books
 
     public function getAu_b()
     {
-        $sth = $this->dbh->prepare('SELECT *
+        $sth = $this->dbTest->prepare('SELECT *
                 FROM `books` AS b
                 LEFT JOIN `authors_books` as ab ON b.id=ab.book_id
                 LEFT JOIN `authors` as a ON ab.author_id = a.id');
@@ -80,30 +77,30 @@ class Books
                 $path_img ='upload/'.time().$_FILES['cover']['name'];
                 move_uploaded_file($_FILES['cover']['tmp_name'],$path_img);
                 // Обновляем данные о книге
-                $this->dbh->exec(
+                $this->dbTest->exec(
                     "UPDATE books 
                       SET book_name = '$book', price = '$price', count = '$count', description = '$description', cover = '$path_img'
                       WHERE id = '$bookId'");
             } else {
                 // Обновляем данные о книге
-                $this->dbh->exec(
+                $this->dbTest->exec(
                     "UPDATE books 
                       SET book_name = '$book', price = '$price', count = '$count', description = '$description'
                       WHERE id = '$bookId'");
             }
 
             // Проверяем есть ли в базе данных связь книги с таким автором (изменился ли автор)
-            $sth = $this->dbh->prepare("SELECT book_id FROM authors_books WHERE author_id = '$author_id'");
+            $sth = $this->dbTest->prepare("SELECT book_id FROM authors_books WHERE author_id = '$author_id'");
             $sth->execute();
             $id = $sth->fetch(\PDO::FETCH_COLUMN);
 
             // Если нету(автор изменился), добавляем в базу новую связь и удаляем старую
             if (!$id) {
                 // Удаляем старую связь
-                $this->dbh->exec("DELETE FROM authors_books WHERE book_id = '$bookId' AND author_id = '$author_id'");
+                $this->dbTest->exec("DELETE FROM authors_books WHERE book_id = '$bookId' AND author_id = '$author_id'");
 
                 // Создаем новую связь
-                $this->dbh->exec("INSERT INTO authors_books SET author_id = '$author_id' AND book_id = '$bookId'");
+                $this->dbTest->exec("INSERT INTO authors_books SET author_id = '$author_id' AND book_id = '$bookId'");
             }
         }
     }
@@ -128,17 +125,17 @@ class Books
             move_uploaded_file($_FILES['cover']['tmp_name'],$path_img);
 
             // Добавить книгу
-            $this->dbh->exec(
+            $this->dbTest->exec(
                 "INSERT INTO books (`book_name`, `price`, `count`, `description`,`cover`) 
                      VALUES ('$book','$price','$count','$description','$path_img')");
 
             // Получаем id книги
-            $bookId = $this->dbh->prepare("SELECT id FROM books WHERE book_name = '$book'");
+            $bookId = $this->dbTest->prepare("SELECT id FROM books WHERE book_name = '$book'");
             $bookId->execute();
             $bookId = $bookId->fetch(\PDO::FETCH_COLUMN);
 
             // Создаем связь
-            $this->dbh->exec(
+            $this->dbTest->exec(
                 "INSERT INTO authors_books (`author_id`, `book_id`) 
                      VALUES ('$author_id','$bookId')");
         }
@@ -153,21 +150,21 @@ class Books
 //        if(file_exists($img)) ;
 
 
-        $this->dbh->exec("DELETE FROM authors_books WHERE author_id = '$a_id' AND book_id = '$b_id'"); // Удаляем связь книги\автора
+        $this->dbTest->exec("DELETE FROM authors_books WHERE author_id = '$a_id' AND book_id = '$b_id'"); // Удаляем связь книги\автора
 
-        $books_id = $this->dbh->prepare("SELECT book_id FROM authors_books WHERE book_id = '$b_id'"); // Проверка наличия книги в базе
+        $books_id = $this->dbTest->prepare("SELECT book_id FROM authors_books WHERE book_id = '$b_id'"); // Проверка наличия книги в базе
         $books_id->execute();
         $books_id = $books_id->fetch(\PDO::FETCH_COLUMN);
 
 
         if (!$books_id) {
-            $img = $this->dbh->prepare("SELECT cover FROM books WHERE id = :id");
+            $img = $this->dbTest->prepare("SELECT cover FROM books WHERE id = :id");
             $img->execute([':id' => $b_id]);
             $img = $img->fetch(\PDO::FETCH_COLUMN);
             if ($img != "upload/noImageAvailable"){
                 unlink($img);
             }
-            $this->dbh->exec("DELETE FROM books  WHERE id = '$b_id'");
+            $this->dbTest->exec("DELETE FROM books  WHERE id = '$b_id'");
         }
     }
 
@@ -187,23 +184,29 @@ class Books
 
         // Присваиваем id книгам - id авторов
         foreach ($id_arr as $book_id){
-            $author_id = $this->dbh->prepare("SELECT author_id FROM authors_books WHERE book_id = '$book_id'");
+            $author_id = $this->dbTest->prepare("SELECT author_id FROM authors_books WHERE book_id = '$book_id'");
             $author_id->execute();
             $author_id = $author_id->fetch(\PDO::FETCH_COLUMN);
             $arr[$book_id] = $author_id;
         }
         foreach ($arr as $b_id => $a_id){
             // Удаление связи с автором
-            $this->dbh->exec("DELETE FROM authors_books WHERE author_id = '$a_id' AND book_id = '$b_id'");
+            $this->dbTest->exec("DELETE FROM authors_books WHERE author_id = '$a_id' AND book_id = '$b_id'");
 
             // Проверка наличия связи с книгой
-            $books_id = $this->dbh->prepare("SELECT book_id FROM authors_books WHERE book_id = '$b_id'");
+            $books_id = $this->dbTest->prepare("SELECT book_id FROM authors_books WHERE book_id = '$b_id'");
             $books_id->execute();
             $books_id = $books_id->fetch(\PDO::FETCH_COLUMN);
 
             // Если связей нету, то удаляем книгу
             if (!$books_id) {
-                $this->dbh->exec("DELETE FROM books  WHERE id = '$b_id'");
+                $img = $this->dbTest->prepare("SELECT cover FROM books WHERE id = :id");
+                $img->execute([':id' => $b_id]);
+                $img = $img->fetch(\PDO::FETCH_COLUMN);
+                if ($img != "upload/noImageAvailable"){
+                    unlink($img);
+                }
+                $this->dbTest->exec("DELETE FROM books  WHERE id = '$b_id'");
             }
         }
     }

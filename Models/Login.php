@@ -7,13 +7,11 @@ namespace Models;
 use System\View;
 
 
-class Login
+class Login extends Datas
 {
-    private $dbh;
-
     public function __construct()
     {
-        $this->dbh = new \PDO('mysql:host=localhost;port=3308;dbname=users', 'root');
+        parent::__construct();
     }
 
     private function generateCode($length = 6)
@@ -35,7 +33,7 @@ class Login
             $pass = md5(md5(trim($_POST['pass'])));
 
             // Получаем данные с базы и нормализируем их
-            $sth = $this->dbh->prepare("SELECT user_hash, user_id, user_password FROM novices WHERE user_login = :login");
+            $sth = $this->dbUsers->prepare("SELECT user_hash, user_id, user_password FROM novices WHERE user_login = :login");
             $sth->execute([':login' => $login]);
             $data1 = $sth->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -52,7 +50,7 @@ class Login
                     setcookie("login", $login, time() + 3600, "/");
                     setcookie("hash", $hash, time() + 3600, "/");
 
-                    $this->dbh->exec(
+                    $this->dbUsers->exec(
                         "UPDATE novices 
                               SET user_hash = '$hash' 
                               WHERE user_id = '$user_id'");
@@ -74,7 +72,7 @@ class Login
         if (isset($_COOKIE['id']) and isset($_COOKIE['hash'])) {
             $id = $_COOKIE['id'];
 
-            $sth = $this->dbh->prepare("SELECT * FROM novices WHERE user_id = :user_id");
+            $sth = $this->dbUsers->prepare("SELECT * FROM novices WHERE user_id = :user_id");
             $sth->execute([':user_id' => $id]);
             $user_data = $sth->fetch(\PDO::FETCH_ASSOC);
             var_dump($user_data);

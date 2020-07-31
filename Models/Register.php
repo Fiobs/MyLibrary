@@ -7,14 +7,11 @@ namespace Models;
 use System\View;
 
 
-class Register
+class Register extends Datas
 {
-    private $dbh;
-
     public function __construct()
     {
-        // Подключаем базу
-        $this->dbh = new \PDO('mysql:host=localhost;port=3308;dbname=users', 'root');
+        parent::__construct();
     }
 
     public function registration()
@@ -38,7 +35,7 @@ class Register
                 $error[] = "Логин должен быть не меньше 3-х символов и не больше 30!!!";
             }
 
-            $sth = $this->dbh->prepare("SELECT user_id FROM novices WHERE user_login = '$login'");
+            $sth = $this->dbUsers->prepare("SELECT user_id FROM novices WHERE user_login = '$login'");
             $sth->execute();
             $check = $sth->fetch(\PDO::FETCH_COLUMN);
 
@@ -53,7 +50,7 @@ class Register
 
             // Если нету ошибок - добавить пользователя
             if (count($error) == 0){
-                $sth = $this->dbh->prepare('INSERT INTO novices(user_login,user_password) VALUES (:login, :pass)');
+                $sth = $this->dbUsers->prepare('INSERT INTO novices(user_login,user_password) VALUES (:login, :pass)');
                 $sth->execute([':login' => $login, ':pass' => $pass]);
                 header("Location: http://library/login");
             } else {
