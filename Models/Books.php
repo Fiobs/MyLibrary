@@ -149,6 +149,10 @@ class Books
         $b_id = $_GET['b'];
         $a_id = $_GET['a'];
 
+//        $img = "upload/1596183180Manyrin.jpg";
+//        if(file_exists($img)) ;
+
+
         $this->dbh->exec("DELETE FROM authors_books WHERE author_id = '$a_id' AND book_id = '$b_id'"); // Удаляем связь книги\автора
 
         $books_id = $this->dbh->prepare("SELECT book_id FROM authors_books WHERE book_id = '$b_id'"); // Проверка наличия книги в базе
@@ -157,6 +161,12 @@ class Books
 
 
         if (!$books_id) {
+            $img = $this->dbh->prepare("SELECT cover FROM books WHERE id = :id");
+            $img->execute([':id' => $b_id]);
+            $img = $img->fetch(\PDO::FETCH_COLUMN);
+            if ($img != "upload/noImageAvailable"){
+                unlink($img);
+            }
             $this->dbh->exec("DELETE FROM books  WHERE id = '$b_id'");
         }
     }

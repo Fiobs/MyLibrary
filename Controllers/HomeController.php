@@ -15,4 +15,9 @@ class HomeController
      // Отображение главной страницы
         View::render('home');
     }
+
+    public function cheatersAction()
+    {
+        View::render('notFound');
+    }
 }

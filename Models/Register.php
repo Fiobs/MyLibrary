@@ -24,11 +24,6 @@ class Register
         $pass = md5(md5(trim($_POST['pass'])));
         $pass2 = md5(md5(trim($_POST['pass2'])));
 
-
-        var_dump($_POST);
-        var_dump(empty($login));
-        var_dump(!empty($login));die();
-
         if (isset($_POST['submit'])) {
             $error = [];
 
@@ -49,7 +44,7 @@ class Register
 
             // Проверям есть ли в базе такой логин
             if ($check){
-                $error[] = "Пользователь с таким логином уже существует в базе данных!!";
+                $error[] = "Пользователь с таким логином уже существует!";
             }
 
             if ($pass != $pass2){

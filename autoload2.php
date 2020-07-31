@@ -13,7 +13,12 @@ function autoload($className)
     }
 
     $fileName .= $className . '.php';
-    require $fileName;
+
+    if(file_exists($fileName)){
+        require_once $fileName;
+    } else {
+        return false;
+    }
 }
 
 spl_autoload_register('autoload');

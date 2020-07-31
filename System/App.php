@@ -38,10 +38,10 @@ class App
 
         // Если класа не существует выдаем ошибку
         if (!class_exists($controller)) {
-            throw new \ErrorException('Controller does not exist');
+            $controller = 'Controllers\\HomeController';
+            $action = "cheatersAction";
         }
 
-//        var_dump($controller);
         // Создаем экземпляр класса контроллера
         $objController = new $controller;
 
