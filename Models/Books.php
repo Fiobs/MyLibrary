@@ -4,26 +4,59 @@
 namespace Models;
 
 
-class Books extends Datas
+class Books
 {
-    private $model;
+    protected $dbh;
+    protected $books = [];
+    protected $authors_books = [];
 
     public function __construct()
     {
-        parent::__construct();
-        $this->model = new Datas();
+        // Подключаем базу
+        $this->dbh = new \PDO('mysql:host=localhost;port=3308;dbname=test_db', 'root');
+        $this->dbh->exec('SET NAMES utf8');
+
     }
 
     public function getBooks()
     {
-        return $this->model->getBooks();
+        $sth = $this->dbh->prepare("SELECT * FROM books");
+        $sth->execute();
+        $arr = $sth->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Присваивание ключам айдишники
+        foreach($arr as $tag){
+            $this->books[$tag['id']] = [
+                'book_name' => $tag['book_name'],
+                'price' => $tag['price'],
+                'count' => $tag['count'],
+                'sale' => $tag['sale'],
+                'description' => $tag['description'],
+                'cover' => $tag['cover'],
+                'data' => $tag['data']
+            ];
+        }
+        return $this->books;
+    }
+
+    public function getAu_b()
+    {
+        $sth = $this->dbh->prepare('SELECT *
+                FROM `books` AS b
+                LEFT JOIN `authors_books` as ab ON b.id=ab.book_id
+                LEFT JOIN `authors` as a ON ab.author_id = a.id');
+        $sth->execute();
+        $this->authors_books = $sth->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->authors_books;
     }
 
     public function editBooks($id)
     {
-        $books['books'] = $this->model->getBooks()[$id]; //Получаем конкретную книгу
+        $books['books'] = $this->getBooks()[$id]; //Получаем конкретную книгу
         $books['books'] += ['book_id' => $id];
-        $authors = $this->model->getAuthors();
+        $au = new Authors();
+        $authors = $au->getAuthors();
 
         foreach ($authors as $id => $tag) {
             $authors_name[$id] = $tag['author_name'];
@@ -130,7 +163,7 @@ class Books extends Datas
 
     public function bookPage($id)
     {
-        $arr = $this->model->getAu_b();
+        $arr = $this->getAu_b();
         foreach ($arr as $item) {
             $item['book_id'] == $id ? $arr2 = $item : false;
         }

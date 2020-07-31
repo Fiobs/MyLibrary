@@ -6,12 +6,14 @@ namespace Models;
 
 class Comments
 {
-    private $model;
+    private $modelAu;
+    private $modelBo;
     private $dbh;
 
     public function __construct()
     {
-        $this->model = new Datas();
+        $this->modelAu = new Authors();
+        $this->modelBo = new Books();
         $this->dbh = new \PDO('mysql:host=localhost;port=3308;dbname=users', 'root');
         $this->dbh->exec('SET NAMES utf8');
     }

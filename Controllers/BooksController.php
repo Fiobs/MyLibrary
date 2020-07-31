@@ -4,6 +4,7 @@
 namespace Controllers;
 
 
+use Models\Authors;
 use Models\Comments;
 use System\View;
 use Models\Books;
@@ -52,7 +53,8 @@ class BooksController
             header("Location: http://library/books");
         }
         // получаем авторов
-        $arr = $this->model->getAuthors();
+        $au = new Authors();
+        $arr = $au->getAuthors();
 
         // приводим к общей форме отображения
         $arr2 = ['authors' => []];

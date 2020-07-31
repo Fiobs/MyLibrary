@@ -4,18 +4,39 @@
 namespace Models;
 
 
-class Authors extends Datas
+class Authors
 {
+    protected $dbh;
+    protected $authors = [];
+
+    public function __construct()
+    {
+        // Подключаем базу
+        $this->dbh = new \PDO('mysql:host=localhost;port=3308;dbname=test_db', 'root');
+        $this->dbh->exec('SET NAMES utf8');
+    }
+
     public function getAuthors()
     {
-        $m = new Datas();
-        return $m->getAuthors();
+        $sth1 = $this->dbh->prepare("SELECT * FROM authors");
+        $sth1->execute();
+        $arr = $sth1->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Присваивание ключам айдишники
+        foreach($arr as $tag){
+            $this->authors[$tag['id']] = [
+                'author_name' => $tag['author_name'],
+                'email' => $tag['email'],
+                'phone' => $tag['phone'],
+                'data_author' => $tag['data_created']
+            ];
+        }
+        return $this->authors;
     }
 
     public function editAuthors($id)
     {
-        $model = new Datas();
-        $author = $model->getAuthors()[$id]; // Получаем конкретного автора
+        $author = $this->getAuthors()[$id]; // Получаем конкретного автора
         $author += ['authors_id' => $id]; // Добавляем в массив id автора
         return $author;
     }

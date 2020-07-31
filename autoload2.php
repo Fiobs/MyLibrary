@@ -13,7 +13,6 @@ function autoload($className)
     }
 
     $fileName .= $className . '.php';
-    var_dump($fileName);
     require $fileName;
 }
 
